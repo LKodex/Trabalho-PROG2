@@ -8,13 +8,10 @@
 #define APROVADOS "aprovados.txt"
 #define REPROVADOS "reprovados.txt"
 
-/**
- *  Tive que refatorar esse código antes do que eu esperava :(
- */
 void cadastrarAluno(AlunoList *&lista, Aluno aluno) {
-    AlunoList *novo = nullptr;
-    AlunoList *prev = nullptr;
-    AlunoList *celula = lista;
+    AlunoList *novo;
+    AlunoList *prev;
+    AlunoList *celula;
 
     novo = (AlunoList *)(malloc(sizeof(AlunoList)));
     novo->aluno = aluno;
@@ -27,13 +24,14 @@ void cadastrarAluno(AlunoList *&lista, Aluno aluno) {
     }
 
     // Insere o aluno na primeira posição caso seja o primeiro na ordem lexicografica
+    celula = lista;
     if (strcmp(novo->aluno.nome, celula->aluno.nome) == -1) {
         novo->next = celula;
         lista = novo;
         return;
     }
 
-    // Avança as células até ???
+    // Avança as células até a célula com nome igual ou posterior a qual deve ser inserida
     while(celula != nullptr) {
         if (strcmp(novo->aluno.nome, celula->aluno.nome) == 1) {
             prev = celula;
@@ -43,7 +41,7 @@ void cadastrarAluno(AlunoList *&lista, Aluno aluno) {
         }
     }
     
-    // Insere na ordem numérica do RA
+    // Insere na ordem numérica do RA caso os nomes sejam iguais
     while(celula != nullptr) {
         if (strcmp(novo->aluno.nome, celula->aluno.nome) == 0 && novo->aluno.ra > celula->aluno.ra) {
             prev = celula;
@@ -52,83 +50,79 @@ void cadastrarAluno(AlunoList *&lista, Aluno aluno) {
             break;
         }
     }
-    // FUNCIONA PARA LEXICOGRAFICAMENTE MAIOR E ORDENADO POR RA
+    // Insere o novo elemento entre a celula atualmente posicionada e a anterior
     novo->next = celula;
     prev->next = novo;
 }
 
-AlunoList *buscarAluno(AlunoList *&lista, char nome[MAX_CHAR]) {
-    AlunoList *listaCelula = nullptr;
-    AlunoList *busca = nullptr;
-    AlunoList *buscaCelula = nullptr;
-    int count = 0;
+void buscarAluno(AlunoList *&lista, char nome[MAX_CHAR]) {
+    AlunoList *celula;
+    AlunoList *nova = nullptr;
+    AlunoList *novaCelula;
+    int count;
 
-    listaCelula = lista;
-
-    while (listaCelula != nullptr) {
-        if (strcmp(listaCelula->aluno.nome, nome) != 0) {
-            count++;
-            buscaCelula = (AlunoList *)(malloc(sizeof(AlunoList)));
-
-            // Guarda a referência da lista para ser retornada depois
-            if (busca == nullptr) {
-                busca = (AlunoList *)(malloc(sizeof(AlunoList)));
-                busca->aluno = listaCelula->aluno;
-                buscaCelula = busca;
+    count = 0;
+    for (celula = lista; celula != nullptr; celula = celula->next) {
+        if (strstr(celula->aluno.nome, nome)) {
+            if (!nova) {
+                nova = (AlunoList *)(malloc(sizeof(AlunoList)));
+                novaCelula = nova;
+                novaCelula->aluno = celula->aluno;
             } else {
-                // Guarda os próximos elementos conforme necessário
-                buscaCelula->next = (AlunoList *)(malloc(sizeof(AlunoList)));
-                buscaCelula = buscaCelula->next;
-                buscaCelula->aluno = listaCelula->aluno;
+                novaCelula->next = (AlunoList *)(malloc(sizeof(AlunoList)));
+                novaCelula = novaCelula->next;
+                novaCelula->aluno = celula->aluno;
             }
-        }
+            count++;
+        }   
     }
-    return busca;
+    
+    if (!nova) {
+        printf("\n%s Não foram encontrados nenhum aluno!\n", APP_PREFIX);
+    } else {
+        imprimir(nova);
+        desalocar(nova);
+        printf("\n%s Total: %d\n", APP_PREFIX, count);
+    }
 }
 
-// Files
+//-- FILES --//
 AlunoList *lerArquivo(char fileName[MAX_CHAR]) {
-    FILE *arquivo = nullptr;
+    FILE *arquivo;
     AlunoList *lista = nullptr;
     Aluno aluno;
-    int aux = 0;
-    int count = 0;
-
-    // Caso não seja digitado o nome do arquivo ele escolhe o arquivo atual.txt por padrão
-    if (strcmp(fileName, "") == 0) {
-        printf("\n>>> Arquivo não específicado, utilizando o arquivo padrão [%s]", ATUAL);
-        strcpy(fileName, ATUAL);
-    }
+    int aux;
+    int count;
 
     arquivo = fopen(fileName, "r");
     // Se o arquivo falhar em abrir é retornado um null pointer
     if (!arquivo){
-        // MSG ERRO
         return nullptr;
     }
 
+    count = 0;
     while(feof(arquivo) == 0) {
         fscanf(arquivo, "%[^0-9] %d %lf %lf %lf %lf", &aluno.nome, &aluno.ra, &aluno.p1, &aluno.p2, &aluno.t, &aluno.po);
-        aux = 0;
-        while(aluno.nome[aux] != '\0') {
-            aux++;
-        }
+        // Remove o espaço em branco do último caractere
+        for (aux = 0; aluno.nome[aux] != '\0'; aux++){ }
         aluno.nome[--aux] = '\0';
+        // Remove a quebra de linha do final de cada linha
         fgetc(arquivo);
         // Para evitar retrabalho somente é chamado a função de cadastar aluno para criar e inserir ordenadamente os elementos na lista
         cadastrarAluno(lista, aluno);
         count++;
     }
+
     fclose(arquivo);
     printf("\n%s %d aluno(s) cadastrados com sucesso!\n", APP_PREFIX, count);
     return *&lista;
 }
 
 void salvarAprovados(AlunoList *&lista) {
-    FILE *arquivo = nullptr;
-    AlunoList *celula = nullptr;
-    double mediaFinal = 0;
-    int count = 0;
+    FILE *arquivo;
+    AlunoList *celula;
+    double mediaFinal;
+    int count;
 
     arquivo = fopen(APROVADOS, "w");
 
@@ -137,6 +131,7 @@ void salvarAprovados(AlunoList *&lista) {
         return;
     }
     
+    count = 0;
     for (celula = lista; celula != nullptr; celula = celula->next) {
         mediaFinal = calcularMediaFinal(celula->aluno);
         if (mediaFinal >= 6){
@@ -145,15 +140,16 @@ void salvarAprovados(AlunoList *&lista) {
         }
     }
     fprintf(arquivo, "Total: %d", count);
+
     fclose(arquivo);
     printf("\n%s %d alunos aprovados salvo no arquivo <%s>\n", APP_PREFIX, count, APROVADOS);
 }
 
 void salvarReprovados(AlunoList *&lista) {
-    FILE *arquivo = nullptr;
-    AlunoList *celula = nullptr;
-    double mediaFinal = 0;
-    int count = 0;
+    FILE *arquivo;
+    AlunoList *celula;
+    double mediaFinal;
+    int count;
 
     arquivo = fopen(REPROVADOS, "w");
 
@@ -162,6 +158,7 @@ void salvarReprovados(AlunoList *&lista) {
         return;
     }
 
+    count = 0;
     for (celula = lista; celula != nullptr; celula = celula->next) {
         mediaFinal = calcularMediaFinal(celula->aluno);
         if (mediaFinal < 6){
@@ -170,15 +167,15 @@ void salvarReprovados(AlunoList *&lista) {
         }
     }
     fprintf(arquivo, "Total: %d", count);
+
     fclose(arquivo);
     printf("\n%s %d alunos reprovados salvo no arquivo <%s>\n", APP_PREFIX, count, REPROVADOS);
 }
 
 void salvarAtual(AlunoList *&lista) {
-    FILE *arquivo = nullptr;
-    AlunoList *celula = nullptr;
+    FILE *arquivo;
+    AlunoList *celula;
 
-    celula = lista;
     arquivo = fopen(ATUAL, "w");
     // Se o arquivo falhar em abrir é retornado false para indicar a falha ao salvar os dados
     if (!arquivo){
@@ -186,48 +183,41 @@ void salvarAtual(AlunoList *&lista) {
         return;
     }
 
-    while(celula != nullptr) {
+    for (celula = lista; celula != nullptr; celula = celula->next) {
         fprintf(arquivo, "%s %d %.1f %.1f %.1f %.1f", celula->aluno.nome, celula->aluno.ra, celula->aluno.p1, celula->aluno.p2, celula->aluno.t, celula->aluno.po);
-        if (celula->next != nullptr){ fprintf(arquivo, "\n"); }
-        
-        celula = celula->next;
+        if (celula->next != nullptr) {
+            fprintf(arquivo, "\n");
+        }
     }
+    
     fclose(arquivo);
     printf("\n%s Todos alunos salvos na memória foram cadastrados no arquivo <%s>\n", APP_PREFIX, ATUAL);
 }
 
-// Utils
-double calcularMediaFinal(Aluno aluno) {
-    // 1. Verifica se a nota da PO é maior que a nota da P1 ou P2
-    if (aluno.po > aluno.p1 || aluno.po > aluno.p2) {
-        if (aluno.po > aluno.p1) {
-            aluno.p1 = aluno.po;
-        } else {
-            aluno.p2 = aluno.po;
-        }
-    }
-    
-    // 2. Calcula e retorna a média final
-    // MF = 0,35 * P1 + 0,35 * P2 + 0,3 * T,
-    return (aluno.p1 * 0.35) + (aluno.p2 * 0.35) + (aluno.t * 0.3);
-}
-
+//-- UTILS --//
 void desalocar(AlunoList *&lista) {
-    AlunoList *prox = lista;
+    AlunoList *prox;
 
-    while (prox != nullptr) {
-        lista = prox;
+    for(prox = lista; prox != nullptr; lista = prox){
         prox = lista->next;
         free(lista);
     }
 }
 
-// DEBUG
-void imprimir(AlunoList *&lista) {
-    AlunoList *prox = lista;
+double calcularMediaFinal(Aluno aluno) {
+    // 1. Verifica se a nota da PO é maior que a nota da P1 ou P2
+    aluno.p1 = aluno.po > aluno.p1 && aluno.po <= aluno.p2 ? aluno.po : aluno.p1;
+    aluno.p2 = aluno.po > aluno.p2 && aluno.po <= aluno.p1 ? aluno.po : aluno.p2;
 
-    while (prox != nullptr) {
-        printf("\nNome: %-31s | RA:%7d | P1:%7.1f | P2:%7.1f | T:%7.1f | PO:%7.1f", prox->aluno.nome, prox->aluno.ra, prox->aluno.p1, prox->aluno.p2, prox->aluno.t, prox->aluno.po);
-        prox = prox->next;
+    // 2. Calcula e retorna a média final
+    // MF = 0,35 * P1 + 0,35 * P2 + 0,3 * T,
+    return (aluno.p1 * 0.35) + (aluno.p2 * 0.35) + (aluno.t * 0.3);
+}
+
+void imprimir(AlunoList *&lista) {
+    AlunoList *prox;
+
+    for (prox = lista; prox != nullptr; prox = prox->next) {
+        printf("\n%s Nome: %-31s | RA: %-8d | Situacao: %-9s", APP_PREFIX, prox->aluno.nome, prox->aluno.ra, (calcularMediaFinal(prox->aluno) >= 6 ? "Aprovado" : "Reprovado"));
     }
 }
