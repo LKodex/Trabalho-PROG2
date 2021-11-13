@@ -78,7 +78,7 @@ void buscarAluno(AlunoList *&lista, char nome[MAX_CHAR]) {
     }
     
     if (!nova) {
-        printf("\n%s Não foram encontrados nenhum aluno!\n", APP_PREFIX);
+        printf("\n%s Não foram encontrados alunos!\n", APP_PREFIX);
     } else {
         imprimir(nova);
         desalocar(nova);
@@ -142,7 +142,7 @@ void salvarAprovados(AlunoList *&lista) {
     fprintf(arquivo, "Total: %d", count);
 
     fclose(arquivo);
-    printf("\n%s %d alunos aprovados salvo no arquivo <%s>\n", APP_PREFIX, count, APROVADOS);
+    printf("\n%s %d alunos estão aprovados e foram salvos no arquivo <%s>\n", APP_PREFIX, count, APROVADOS);
 }
 
 void salvarReprovados(AlunoList *&lista) {
@@ -169,7 +169,7 @@ void salvarReprovados(AlunoList *&lista) {
     fprintf(arquivo, "Total: %d", count);
 
     fclose(arquivo);
-    printf("\n%s %d alunos reprovados salvo no arquivo <%s>\n", APP_PREFIX, count, REPROVADOS);
+    printf("\n%s %d alunos estão reprovados e foram salvos no arquivo <%s>\n", APP_PREFIX, count, REPROVADOS);
 }
 
 void salvarAtual(AlunoList *&lista) {
@@ -179,7 +179,7 @@ void salvarAtual(AlunoList *&lista) {
     arquivo = fopen(ATUAL, "w");
     // Se o arquivo falhar em abrir é retornado false para indicar a falha ao salvar os dados
     if (!arquivo){
-        printf("\n%s ERRO! Houve um erro ao salvar lista dos alunos atualmente cadastrados na memória!\n", APP_PREFIX);
+        printf("\n%s ERRO! Houve um erro ao salvar lista de alunos cadastrados no arquivo <%s>\n", APP_PREFIX, ATUAL);
         return;
     }
 

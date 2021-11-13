@@ -10,13 +10,13 @@ int main(int argc, char* argv[]) {
     int opcao;
 
     while (opcao != 7) {
-        printf("\n%s 1.\tCadastar novo aluno", APP_PREFIX);
-        printf("\n%s 2.\tBuscar aluno", APP_PREFIX);
+        printf("\n%s 1.\tCadastrar novo(a) aluno(a)", APP_PREFIX);
+        printf("\n%s 2.\tBuscar aluno(a)", APP_PREFIX);
         printf("\n%s 3.\tLer arquivo com listagem de alunos", APP_PREFIX);
-        printf("\n%s 4.\tGerar arquivo com dados de alunos aprovados", APP_PREFIX);
-        printf("\n%s 5.\tGerar arquivo com dados de alunos reprovados", APP_PREFIX);
+        printf("\n%s 4.\tGerar arquivo com alunos aprovados", APP_PREFIX);
+        printf("\n%s 5.\tGerar arquivo com alunos reprovados", APP_PREFIX);
         printf("\n%s 6.\tVisualizar todos alunos cadastrados", APP_PREFIX);
-        printf("\n%s 7.\tFechar programa", APP_PREFIX);
+        printf("\n%s 7.\tSAIR", APP_PREFIX);
 
         printf("\n\nOpção:\t");
         scanf("%d", &opcao);
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
                 printf("\n%s Por favor selecione uma opção de 1 a 7\n", APP_PREFIX);
         }
     }
-    printf("\nTenha um bom dia, até breve :)\n");
+    printf("\nPrograma finalizado! Até breve\n");
 
     return 0;
 }

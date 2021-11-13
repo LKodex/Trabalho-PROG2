@@ -5,8 +5,8 @@
 ---
 ## Compile rapidamente
 
-> gcc -o main ./src/sources/main.cpp ./src/sources/alunos.cpp
+`gcc -o main ./src/sources/main.cpp ./src/sources/alunos.cpp`
 
-> g++ -o main ./src/sources/main.cpp ./src/sources/alunos.cpp
+`g++ -o main ./src/sources/main.cpp ./src/sources/alunos.cpp`
 
-* GitHub: https://github.com/LKodex/Trabalho-PROG2
+Cique [aqui](https://github.com/LKodex/Trabalho-PROG2) para ver o projeto no GitHub
